@@ -1,4 +1,4 @@
-package com.food.keycloak.config;
+package com.food.keycloak.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
@@ -12,10 +12,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,8 +36,8 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
 
         return new JwtAuthenticationToken(
                 jwt,
-                authorities,
-                getPrincipleClaimName(jwt)
+                authorities
+//                getPrincipleClaimName(jwt)
         );
     }
 
@@ -49,6 +46,7 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
         if (principleAttribute != null) {
             claimName = principleAttribute;
         }
+
         return jwt.getClaim(claimName);
     }
 

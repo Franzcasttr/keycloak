@@ -1,7 +1,6 @@
-package com.food.keycloak.config;
+package com.food.keycloak.security;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -15,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
-@Slf4j
+//@Slf4j
 public class SercurityConfig {
     private final JwtAuthConverter jwtAuthConverter;
     @Bean

@@ -1,6 +1,26 @@
-#spring.application.name=keycloak
+#spring.application.name=keycloak spring.docker.compose.enabled=true
+#spring.docker.compose.file=docker-compose.yml
 
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:54321/foodybackenddb
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  docker:
+    compose:
+      enabled: true
+      file: docker-compose.yml
+
   security:
     oauth2:
       resourceserver:
