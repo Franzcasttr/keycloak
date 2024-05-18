@@ -1,9 +1,11 @@
 package com.food.keycloak.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,11 +27,12 @@ public class SercurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/api/v1/products/getAllProduct")
+                        req.requestMatchers(HttpMethod.GET,"/api/v1/products/getAllProduct", "/api/v1/products/{id}")
                                     .permitAll()
                                 .anyRequest()
                                     .authenticated()
-                );
+                ).exceptionHandling((auth)-> auth.authenticationEntryPoint((request, response, authException) ->
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND)));
 
         http
                 .oauth2ResourceServer((oauth2 )-> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)));

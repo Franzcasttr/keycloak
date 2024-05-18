@@ -10,7 +10,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductService {
     String createProduct(ProductDto productDto);
-    PageResponse<ProductResponse> findAllProducts(int page, int size);
-
+    PageResponse<ProductResponse> findAllProducts(int page,
+                                                  int size,
+                                                  String sortDirection,
+                                                  String search,
+                                                  String category);
+    ProductResponse findSingleProduct(String id);
+    ProductResponse updateProduct(String id, ProductDto productDto);
     String delete(String id);
 }

@@ -11,11 +11,11 @@ import com.food.keycloak.product.controller.ProductResponse;
 import com.food.keycloak.product.dto.ProductDto;
 import com.food.keycloak.product.services.ProductService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,7 +23,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ProductImp implements ProductService {
 
     private final ProductMappers productMapper;
@@ -35,14 +34,11 @@ public class ProductImp implements ProductService {
         try{
             CloudinaryDto fileUploader = cloudinaryService.uploadFile(productDto.getImage(), "Product Images");
             ProductEntity product = productMapper.toCreate(productDto, fileUploader.getSecured_url(), fileUploader.getPublic_id());
-//            if (product.getImage() == null){
-//                return ResponseEntity.badRequest().build();
-//            }
             productRepository.save(product);
             return "Success";
         }catch (Exception e){
             e.printStackTrace();
-            return null;
+            throw new ApiRequestException(e.getMessage());
         }
 
 
@@ -50,9 +46,21 @@ public class ProductImp implements ProductService {
     }
 
     @Override
-    public PageResponse<ProductResponse> findAllProducts(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<ProductEntity> product = productRepository.findAll(pageable);
+    public PageResponse<ProductResponse> findAllProducts(int page, int size, String sortDirection, String searchItem, String category) {
+        Sort primarySort = sortDirection.equalsIgnoreCase("price-highest")
+                ? Sort.by(Sort.Direction.DESC, "price")
+                : Sort.by(Sort.Direction.ASC, "price");
+        Sort sort = primarySort.and(Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<ProductEntity> product;
+        if (searchItem != null && !searchItem.isEmpty()){
+            product = productRepository.findByNameContainingIgnoreCaseAndCategory(searchItem, category, pageable);
+        }else{
+
+
+        product = productRepository.findAll(pageable);
+        }
         List<ProductResponse> productResponse = product.stream().map(productMapper::toProductResponse).toList();
         return new PageResponse<>(
                 productResponse,
@@ -66,6 +74,41 @@ public class ProductImp implements ProductService {
     }
 
     @Override
+    public ProductResponse findSingleProduct(String id) {
+        try{
+
+            ProductEntity product = productRepository.findById(UUID.fromString(id)).orElseThrow(()-> new ApiRequestException("Product with " + id + " not found"));
+
+         return productMapper.toProductResponse(product);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ApiRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ProductResponse updateProduct(String id, ProductDto productDto) {
+          try{
+              CloudinaryDto fileUploader = null;
+              ProductEntity updatedProduct;
+
+              ProductEntity findProduct = productRepository.findById(UUID.fromString(id)).orElseThrow(()-> new ApiRequestException("Product with " + id + " not found"));
+              if (productDto.getImage() != null){
+
+              fileUploader = cloudinaryService.uploadFile(productDto.getImage(), "Product Images");
+              updatedProduct = productMapper.toUpdate(findProduct,productDto, fileUploader.getSecured_url(), fileUploader.getPublic_id());
+              }else{
+              updatedProduct = productMapper.toUpdate(findProduct,productDto);
+              }
+            productRepository.save(updatedProduct);
+            return productMapper.toProductResponse(updatedProduct);
+        }catch (Exception e){
+            e.printStackTrace();
+              throw new ApiRequestException(e.getMessage());
+        }
+    }
+
+    @Override
     public String delete(String id) {
         try {
         ProductEntity product = productRepository.findById(UUID.fromString(id)).orElseThrow(()-> new ApiRequestException("product could not delete"));
@@ -75,7 +118,7 @@ public class ProductImp implements ProductService {
         return "Product successfully deleted";
         }catch (Exception e){
             e.printStackTrace();
-            return null;
+            throw new ApiRequestException(e.getMessage());
         }
     }
 }
