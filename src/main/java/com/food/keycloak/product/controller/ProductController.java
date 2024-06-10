@@ -1,7 +1,6 @@
 package com.food.keycloak.product.controller;
 
 import com.food.keycloak.common.PageResponse;
-import com.food.keycloak.exception.ApiRequestException;
 import com.food.keycloak.product.ProductMappers;
 import com.food.keycloak.product.dto.ProductDto;
 import com.food.keycloak.product.services.ProductService;

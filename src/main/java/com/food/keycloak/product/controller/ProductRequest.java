@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
 import java.util.UUID;
 
 public record ProductRequest(UUID id,
